@@ -1,26 +1,88 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+
+  constructor(protected readonly prisma: PrismaService){}
+
+  async create(createUserDto: CreateUserDto) : Promise<User> 
+  {
+    return await this.prisma.user.create({
+      data: createUserDto
+    });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(page:number = 1) : Promise <User[]|null> 
+  {
+    return await this.prisma.user.findMany({
+      take : 10,
+      skip : 10 * (page-1)
+    });
+
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(uuid: string) : Promise <User|null>
+  {
+    return await this.prisma.user.findUnique({
+      where: {
+        uuid
+      }
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(uuid: string, updateUserDto: UpdateUserDto) : Promise <User|null> 
+  {
+    let user:User|null;
+    
+    try {
+      user = await this.prisma.user.update({
+        data: {
+          name: updateUserDto.name,
+          email: updateUserDto.email,
+          password: updateUserDto.password,
+          updated_at: (new Date())
+        },
+        where: {
+          uuid
+        }
+
+      });
+      
+    } catch (error) {
+      user = null;
+      console.log(error);
+      
+    }
+    return user;
+    
+    
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(uuid: string) : Promise<boolean> 
+  {
+    let result: boolean;
+    
+    try 
+    {
+      await this.prisma.user.delete({
+        where:{
+          uuid
+        }
+      });
+
+      result = true;
+      
+    } 
+    catch (error) 
+    {
+      result = false;
+    }
+
+    return result;
   }
 }

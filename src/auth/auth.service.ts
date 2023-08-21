@@ -7,6 +7,7 @@ import { AuthForgetDto } from './dto/auth-forget.dto';
 import { AuthResetDto } from './dto/auth-reset.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
 import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
             }
     }
 
-    async checkToken(token: string)
+    checkToken(token: string)
     {
         try 
         {
@@ -59,7 +60,7 @@ export class AuthService {
 
     }
 
-    async isValidToken(token: string) : Promise<boolean>
+    isValidToken(token: string) : boolean
     {
         try 
         {
@@ -76,12 +77,16 @@ export class AuthService {
     {
         const user = await this.prisma.user.findFirst({
             where: {
-                email: dto.email,
-                password: dto.password
+                email: dto.email
             }
         });
 
         if(!user)
+        {
+            throw new UnauthorizedException("Email and/or password incorrect!");
+        }
+
+        if(!await bcrypt.compare(dto.password, user.password))
         {
             throw new UnauthorizedException("Email and/or password incorrect!");
         }
@@ -130,6 +135,12 @@ export class AuthService {
     {
         const user = await this.userService.create(dto);
         return await this.createToken(user);
+    }
+
+
+    public aboutMe(token: string)
+    {
+        
     }
 
 }

@@ -40,7 +40,11 @@ export class UsersService {
   async update(uuid: string, updateUserDto: UpdateUserDto) : Promise <User|null> 
   {
     let user:User|null;
-    updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    if(updateUserDto.password)
+    {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+    
     
     try {
       user = await this.prisma.user.update({

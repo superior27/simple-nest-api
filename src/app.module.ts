@@ -11,7 +11,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ThrottlerModule.forRoot({
       ttl: 60,
-      limit: 1
+      limit: 10000
     }),
     ConfigModule.forRoot(),
     forwardRef(() => UsersModule), 

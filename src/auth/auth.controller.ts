@@ -42,7 +42,7 @@ export class AuthController {
   @Post('reset')
   public async reset(@Body() dto: AuthResetDto)
   {
-
+    return await this.authService.reset(dto);
   }
 
   @UseGuards(AuthGuard)

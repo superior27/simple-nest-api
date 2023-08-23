@@ -8,6 +8,7 @@ import { AuthResetDto } from './dto/auth-reset.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly prisma: PrismaService,
         private readonly userService: UsersService,
+        private readonly mailer: MailerService,
     )
     {
 
@@ -108,26 +110,45 @@ export class AuthService {
             throw new NotFoundException("Email not found!");
         }
 
-        //TO DO: Send email
+        const token = await this.createToken(user);
+
+        await this.mailer.sendMail({
+            subject: 'Forget Password',
+            template: 'forget',
+            to: 'lucas.fsl.92@gmail.com',
+            context: {
+                name: user.name,
+                token: token.accessToken
+            }
+        });
         return user;
 
     }
 
     public async reset(dto: AuthResetDto) : Promise<{}>
     {
-        //TO DO: Validated token
+        try {
+            const data = this.checkToken(dto.token);
+            const password = await bcrypt.hash(dto.password, 10);
+            const user = await this.prisma.user.update({
+                where:{
+                    uuid: data.uuid
+                },
+                data:{
+                    password: password,
+                    updated_at: new Date()
+                }
+            });
+
+            return this.createToken(user);
+        } catch (error) {
+            throw new UnauthorizedException('Token is invalid!');
+        }
+        
+        
 
         //TO DO: get uuid from token
-        const uuid = '';
-
-        const user = await this.prisma.user.update({
-            where:{
-                uuid
-            },
-            data:dto
-        });
-
-        return this.createToken(user);
+        
 
     }
 

@@ -3,10 +3,11 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
-import { RoleGuard } from 'src/guards/role.guard';
-import { Roles } from 'src/decorators/role.decorator';
-import { Role } from 'src/enums/role.enum';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { Roles } from '../decorators/role.decorator';
+import { Role } from '../enums/role.enum';
+import { AuthGuard } from '../guards/auth.guard';
+import { RoleGuard } from '../guards/role.guard';
+
 
 
 @Roles(Role.ADMIN)

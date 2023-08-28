@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthLoginDto } from './dto/auth-login.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { AuthForgetDto } from './dto/auth-forget.dto';
 import { AuthResetDto } from './dto/auth-reset.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
-import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +26,8 @@ export class AuthService {
 
     }
 
-    async createToken(user: User) {
+    createToken(user: User) 
+    {
         return {
             accessToken: this.jwtService.sign(
                 {
@@ -75,7 +76,7 @@ export class AuthService {
         }
     }
 
-    public async login(dto: AuthLoginDto) : Promise<{}>
+    public async login(dto: AuthLoginDto) : Promise<{accessToken: string}>
     {
         const user = await this.prisma.user.findFirst({
             where: {
@@ -97,7 +98,7 @@ export class AuthService {
 
     }
 
-    public async forget(dto: AuthForgetDto) : Promise<User>
+    async forget(dto: AuthForgetDto) : Promise<User>
     {
         const user = await this.prisma.user.findFirst({
             where: {
@@ -110,7 +111,7 @@ export class AuthService {
             throw new NotFoundException("Email not found!");
         }
 
-        const token = await this.createToken(user);
+        const token = this.createToken(user);
 
         await this.mailer.sendMail({
             subject: 'Forget Password',
@@ -125,7 +126,7 @@ export class AuthService {
 
     }
 
-    public async reset(dto: AuthResetDto) : Promise<{}>
+    public async reset(dto: AuthResetDto) : Promise<{accessToken: string}>
     {
         try {
             const data = this.checkToken(dto.token);

@@ -4,11 +4,10 @@ import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
 import { AuthForgetDto } from './dto/auth-forget.dto';
 import { AuthResetDto } from './dto/auth-reset.dto';
-import { UsersService } from 'src/users/users.service';
-import { AuthGuard } from 'src/guards/auth.guard';
-import { User } from 'src/decorators/user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FileService } from 'src/file/file.service';
+import { User } from '../decorators/user.decorator';
+import { FileService } from '../file/file.service';
+import { AuthGuard } from '../guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -47,9 +46,9 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('about-me')
-  async aboutMe(@User() user)
+  async aboutMe(@User() user, @Req() {token})
   {
-    return user;
+    return {user, token};
 
   }
 

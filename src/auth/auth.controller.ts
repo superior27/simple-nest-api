@@ -8,6 +8,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from '../decorators/user.decorator';
 import { FileService } from '../file/file.service';
 import { AuthGuard } from '../guards/auth.guard';
+import { User as UserPrima} from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -46,7 +47,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('about-me')
-  async aboutMe(@User() user, @Req() {token})
+  async aboutMe(@User() user, @Req() {token}): Promise<{user: UserPrima, token: {}}>
   {
     return {user, token};
 

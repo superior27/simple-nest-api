@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, HttpStatus, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, HttpStatus, Res, UseGuards, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -46,16 +46,16 @@ export class UsersController {
 
  
   @Delete(':id')
-  async remove(@Res() response, @Param('id') id: string)  : Promise<Response>
+  async remove(@Param('id') id: string)  : Promise<String>
   {
-    const result = await this.usersService.remove(id);
-
-    const message = (result) 
-      ? [`User ${id} removed!`, HttpStatus.OK] 
-      : [`User ${id} not found!`, HttpStatus.NOT_FOUND];
+    try {
+      const result = await this.usersService.remove(id);
+      return `User ${id} removed!`;
+      
+    } catch (error) {
+      throw new NotFoundException(`User ${id} not found!`);
+    }
     
-    
-    return response.status(message[1]).json(message[0]);
   }
 
 

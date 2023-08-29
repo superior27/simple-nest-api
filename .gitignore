@@ -34,6 +34,3 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# images
-/storage
-/storage/images

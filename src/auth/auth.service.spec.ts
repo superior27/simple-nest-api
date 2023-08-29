@@ -10,7 +10,7 @@ import { accessToken } from '../testing/jwt/access-token.mock';
 import { jwtTokenPayload } from '../testing/jwt/jwt-token-payload.mock';
 import { fakeAuthLoginDto } from '../testing/auth/auth-login-dto.mock';
 import { fakeAuthForgetDto } from '../testing/auth/auth-forget-dto.mock';
-import { fakeAuthResetnDto } from '../testing/auth/auth-reset-dto.mock';
+import { fakeAuthResetDto } from '../testing/auth/auth-reset-dto.mock';
 import { fakeAuthRegisterDTO } from '../testing/auth/auth-register-dto.mock';
 
 // npm test src/auth/auth.service.spec.ts
@@ -61,7 +61,7 @@ describe('AuthService', () => {
   });
 
 
-  describe('auth', () => {
+  describe('auth ecosystem', () => {
    
 
     it('should be login', async () => {
@@ -78,7 +78,7 @@ describe('AuthService', () => {
 
 
     it('should be recive a valid token and new password and return a new access-token', async () => {
-      const result = await service.reset(fakeAuthResetnDto);
+      const result = await service.reset(fakeAuthResetDto);
       expect(result).toEqual({accessToken: accessToken});
 
     });

@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { userPrismaMock } from '../testing/users/users-prisma.mock';
 import { fakeUserCreateDTO } from '../testing/users/users-create-dto.mock';
 
-
 // npm test src/users/users.service.spec.ts
 describe('UsersService', () => {
   let service: UsersService;
@@ -13,9 +12,11 @@ describe('UsersService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService, {
-          provide: PrismaService, useValue: userPrismaMock
-        }
+        UsersService,
+        {
+          provide: PrismaService,
+          useValue: userPrismaMock,
+        },
       ],
     }).compile();
 
@@ -36,11 +37,6 @@ describe('UsersService', () => {
       // expect(prisma.user.create).toHaveBeenCalledWith({
       //   data: fakeUsers[0],
       // });
-
     });
-
   });
-
-  
-
 });

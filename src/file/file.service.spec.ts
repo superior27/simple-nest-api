@@ -18,14 +18,10 @@ describe('FileService', () => {
     expect(service).toBeDefined();
   });
 
-
   describe('upload image', () => {
-  
     it('shold be upload a file', async () => {
       const image = await getImage();
       service.storage(image);
-    })
-
+    });
   });
-
 });

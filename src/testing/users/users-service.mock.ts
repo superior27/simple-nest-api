@@ -1,5 +1,5 @@
-import { UsersService } from "../../users/users.service";
-import { fakeUsers } from "./users-fake-repository.mock";
+import { UsersService } from '../../users/users.service';
+import { fakeUsers } from './users-fake-repository.mock';
 
 export const userServiceMock = {
   provide: UsersService,

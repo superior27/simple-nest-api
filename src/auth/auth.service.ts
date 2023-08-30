@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { User } from '@prisma/client';
@@ -12,157 +17,124 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
+  private issuer = 'login';
+  private audience = 'users';
 
-    private issuer = 'login';
-    private audience = 'users';
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly userService: UsersService,
+    private readonly mailer: MailerService,
+  ) {}
 
-    constructor(
-        private readonly jwtService: JwtService,
-        private readonly prisma: PrismaService,
-        private readonly userService: UsersService,
-        private readonly mailer: MailerService,
-    )
-    {
-
-    }
-
-    createToken(user: User) 
-    {
-        return {
-            accessToken: this.jwtService.sign(
-                {
-                    uuid: user.uuid,
-
-                },
-                {
-                    expiresIn: "0.5h",
-                    subject: user.uuid,
-                    issuer: this.issuer,
-                    audience: this.audience,
-                })
-            }
-    }
-
-    checkToken(token: string)
-    {
-        try 
+  createToken(user: User) {
+    return {
+      accessToken: this.jwtService.sign(
         {
-            const verifiedToken = this.jwtService.verify(token, {
-                issuer: this.issuer,
-                audience: this.audience
-            });
-
-            return verifiedToken;
-            
-        } 
-        catch (error)
+          uuid: user.uuid,
+        },
         {
-            throw new BadRequestException(error);
-            
-        }        
+          expiresIn: '0.5h',
+          subject: user.uuid,
+          issuer: this.issuer,
+          audience: this.audience,
+        },
+      ),
+    };
+  }
 
+  checkToken(token: string) {
+    try {
+      const verifiedToken = this.jwtService.verify(token, {
+        issuer: this.issuer,
+        audience: this.audience,
+      });
+
+      return verifiedToken;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  isValidToken(token: string): boolean {
+    try {
+      this.checkToken(token);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  public async login(dto: AuthLoginDto): Promise<{ accessToken: string }> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Email and/or password incorrect!');
     }
 
-    isValidToken(token: string) : boolean
-    {
-        try 
-        {
-            this.checkToken(token);
-            return true;
-        } 
-        catch (error) 
-        {
-            return false;
-        }
+    if (!(await bcrypt.compare(dto.password, user.password))) {
+      throw new UnauthorizedException('Email and/or password incorrect!');
     }
 
-    public async login(dto: AuthLoginDto) : Promise<{accessToken: string}>
-    {
-        const user = await this.prisma.user.findFirst({
-            where: {
-                email: dto.email
-            }
-        });
+    return this.createToken(user);
+  }
 
-        if(!user)
-        {
-            throw new UnauthorizedException("Email and/or password incorrect!");
-        }
+  async forget(dto: AuthForgetDto): Promise<User> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: dto.email,
+      },
+    });
 
-        if(!await bcrypt.compare(dto.password, user.password))
-        {
-            throw new UnauthorizedException("Email and/or password incorrect!");
-        }
-
-        return this.createToken(user);
-
+    if (!user) {
+      throw new NotFoundException('Email not found!');
     }
 
-    async forget(dto: AuthForgetDto) : Promise<User>
-    {
-        const user = await this.prisma.user.findFirst({
-            where: {
-                email: dto.email
-            }
-        });
+    const token = this.createToken(user);
 
-        if(!user)
-        {
-            throw new NotFoundException("Email not found!");
-        }
+    await this.mailer.sendMail({
+      subject: 'Forget Password',
+      template: 'forget',
+      to: 'lucas.fsl.92@gmail.com',
+      context: {
+        name: user.name,
+        token: token.accessToken,
+      },
+    });
+    return user;
+  }
 
-        const token = this.createToken(user);
+  public async reset(dto: AuthResetDto): Promise<{ accessToken: string }> {
+    try {
+      const data = this.checkToken(dto.token);
+      const password = await bcrypt.hash(dto.password, 10);
+      const user = await this.prisma.user.update({
+        where: {
+          uuid: data.uuid,
+        },
+        data: {
+          password: password,
+          updated_at: new Date(),
+        },
+      });
 
-        await this.mailer.sendMail({
-            subject: 'Forget Password',
-            template: 'forget',
-            to: 'lucas.fsl.92@gmail.com',
-            context: {
-                name: user.name,
-                token: token.accessToken
-            }
-        });
-        return user;
-
+      return this.createToken(user);
+    } catch (error) {
+      throw new UnauthorizedException('Token is invalid!');
     }
 
-    public async reset(dto: AuthResetDto) : Promise<{accessToken: string}>
-    {
-        try {
-            const data = this.checkToken(dto.token);
-            const password = await bcrypt.hash(dto.password, 10);
-            const user = await this.prisma.user.update({
-                where:{
-                    uuid: data.uuid
-                },
-                data:{
-                    password: password,
-                    updated_at: new Date()
-                }
-            });
+    //TO DO: get uuid from token
+  }
 
-            return this.createToken(user);
-        } catch (error) {
-            throw new UnauthorizedException('Token is invalid!');
-        }
-        
-        
-
-        //TO DO: get uuid from token
-        
-
-    }
-
-    public async register(dto: AuthRegisterDto) : Promise<{}>
-    {
-        const user = await this.userService.create(dto);
-        return await this.createToken(user);
-    }
-
-
-    public aboutMe(token: string)
-    {
-        
-    }
-
+  public async register(
+    dto: AuthRegisterDto,
+  ): Promise<{ accessToken: string }> {
+    const user = await this.userService.create(dto);
+    console.log(user);
+    return await this.createToken(user);
+  }
 }

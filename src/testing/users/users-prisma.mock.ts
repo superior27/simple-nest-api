@@ -1,4 +1,4 @@
-import { fakeUsers } from "./users-fake-repository.mock";
+import { fakeUsers } from './users-fake-repository.mock';
 
 export const userPrismaMock = {
   user: {

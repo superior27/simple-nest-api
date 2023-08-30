@@ -20,14 +20,15 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AuthService, 
+        AuthService,
         //refatorar esse cara
         {
-          provide: PrismaService, useValue: userPrismaMock
+          provide: PrismaService,
+          useValue: userPrismaMock,
         },
         jwtServiceMock,
         userServiceMock,
-        mailerServiceMock
+        mailerServiceMock,
       ],
     }).compile();
 
@@ -38,58 +39,42 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-
   describe('token', () => {
     it('should be create a token', () => {
       const result = service.createToken(fakeUsers[0]);
-      expect(result).toEqual({accessToken: accessToken});
-
+      expect(result).toEqual({ accessToken: accessToken });
     });
 
     it('should be verify a token', () => {
       const result = service.checkToken(accessToken);
       expect(result).toEqual(jwtTokenPayload);
-
     });
 
     it('should be check if a token is valid', () => {
       const result = service.isValidToken(accessToken);
       expect(result).toEqual(true);
-
     });
-
   });
 
-
   describe('auth ecosystem', () => {
-   
-
     it('should be login', async () => {
       const result = await service.login(fakeAuthLoginDto);
-      expect(result).toEqual({accessToken: accessToken});
-
+      expect(result).toEqual({ accessToken: accessToken });
     });
 
     it('should be return true if is a valid email', async () => {
       const result = await service.forget(fakeAuthForgetDto);
       expect(result).toEqual(fakeUsers[0]);
-
     });
-
 
     it('should be recive a valid token and new password and return a new access-token', async () => {
       const result = await service.reset(fakeAuthResetDto);
-      expect(result).toEqual({accessToken: accessToken});
-
+      expect(result).toEqual({ accessToken: accessToken });
     });
-
 
     it('should be register a user and return a token', async () => {
       const result = await service.register(fakeAuthRegisterDTO);
-      expect(result).toEqual({accessToken: accessToken});
-
+      expect(result).toEqual({ accessToken: accessToken });
     });
-
   });
-
 });

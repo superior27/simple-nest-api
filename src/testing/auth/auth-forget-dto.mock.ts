@@ -1,7 +1,5 @@
-import { AuthForgetDto } from "../../auth/dto/auth-forget.dto";
-
+import { AuthForgetDto } from '../../auth/dto/auth-forget.dto';
 
 export const fakeAuthForgetDto: AuthForgetDto = {
-  email: "admin@gmail.com"
-}
-  
+  email: 'admin@gmail.com',
+};

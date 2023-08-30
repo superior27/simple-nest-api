@@ -1,8 +1,6 @@
-import { AuthLoginDto } from "../../auth/dto/auth-login.dto";
-
+import { AuthLoginDto } from '../../auth/dto/auth-login.dto';
 
 export const fakeAuthLoginDto: AuthLoginDto = {
-  email: "admin@gmail.com",
-  password: "123456",
-}
-  
+  email: 'teste12134@gmail.com',
+  password: '123456',
+};

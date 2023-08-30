@@ -10,16 +10,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id            Int         @default(autoincrement()) @id
-  uuid          String      @default(uuid()) @unique
-  name          String
-  email         String
-  password      String
-  role          Int         @default(1)
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @default(now())
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
+  name       String
+  email      String
+  password   String
+  role       Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 
   @@map("users")
 }

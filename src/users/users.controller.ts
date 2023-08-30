@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, HttpStatus, Res, UseGuards, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+  HttpStatus,
+  Res,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,26 +22,20 @@ import { Role } from '../enums/role.enum';
 import { AuthGuard } from '../guards/auth.guard';
 import { RoleGuard } from '../guards/role.guard';
 
-
-
 @Roles(Role.ADMIN)
 @UseGuards(AuthGuard, RoleGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) 
-  {
+  async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
 
-
   @Get()
-  async findAll(@Query('page') page:number=1) : Promise<User[]|null>
-  {
-    page = (isNaN(+page)) ? 1 : Math.trunc(page);
+  async findAll(@Query('page') page: number = 1): Promise<User[] | null> {
+    page = isNaN(+page) ? 1 : Math.trunc(page);
     return await this.usersService.findAll(page);
   }
 
@@ -37,26 +45,21 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) : Promise<User|null>  
-  {
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User | null> {
     return await this.usersService.update(id, updateUserDto);
   }
 
- 
   @Delete(':id')
-  async remove(@Param('id') id: string)  : Promise<String>
-  {
+  async remove(@Param('id') id: string): Promise<string> {
     try {
       const result = await this.usersService.remove(id);
       return `User ${id} removed!`;
-      
     } catch (error) {
       throw new NotFoundException(`User ${id} not found!`);
     }
-    
   }
-
-
 }

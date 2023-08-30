@@ -10,16 +10,15 @@ import { FileModule } from './file/file.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 
-
 @Module({
   imports: [
     ThrottlerModule.forRoot({
       ttl: 60,
-      limit: 10000
+      limit: 10000,
     }),
     ConfigModule.forRoot(),
-    forwardRef(() => UsersModule), 
-    forwardRef(() => AuthModule), 
+    forwardRef(() => UsersModule),
+    forwardRef(() => AuthModule),
     FileModule,
     MailerModule.forRoot({
       transport: {
@@ -27,8 +26,8 @@ import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
         port: 587,
         auth: {
           user: 'april5@ethereal.email',
-          pass: 'GDfpUvYPqvThWqtYpd'
-        }
+          pass: 'GDfpUvYPqvThWqtYpd',
+        },
       },
       defaults: {
         from: '"nest-modules" <april5@ethereal.email>',
@@ -47,8 +46,8 @@ import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard
-    }
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
